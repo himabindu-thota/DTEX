@@ -1,3 +1,5 @@
+"""This module provides API acceptance tests for our hacker news app"""
+
 import requests
 import pytest
 from hn_app import get_top_stories, get_item
@@ -87,4 +89,13 @@ def test_unreachable_api():
     with pytest.raises(requests.exceptions.ConnectionError):
         unreachable_api()
 
-### Fixtures ###
+### Get all 500 stories in top stories one at a time ###
+@pytest.mark.burst
+def test_get_all_top_stories_and_iterate():
+    print('\n\n *** NOTE: This test takes about 2 mins to complete. ' + \
+           'To skip next time use -m "not burst" flag')
+    resp_top = get_top_stories()
+    assert resp_top.status_code == 200
+    for story_id in resp_top.json():
+        resp_story = get_item(story_id)
+        assert resp_story.status_code == 200
